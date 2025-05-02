@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  vless:
+    image: teddysun/xray
+    container_name: vless-server
+    restart: always
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./config:/etc/xray
+      - ./logs:/var/log/xray
+    networks:
+      - traefik_web-network
+    labels:
+      - "traefik.enable=true"
+      # HTTP роут для Let's Encrypt челленджа
+      - "traefik.http.routers.vless-http.rule=Host(`vless-server.perek.rest`)"
+      - "traefik.http.routers.vless-http.entrypoints=web"
+      - "traefik.http.routers.vless-http.service=vless-service"
+      # HTTPS роут
+      - "traefik.http.routers.vless-https.rule=Host(`vless-server.perek.rest`)"
+      - "traefik.http.routers.vless-https.entrypoints=websecure"
+      - "traefik.http.routers.vless-https.tls=true"
+      - "traefik.http.routers.vless-https.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.vless-https.service=vless-service"
+      # TCP роут для VLESS
+      - "traefik.tcp.routers.vless-tcp.rule=HostSNI(`vless-server.perek.rest`)"
+      - "traefik.tcp.routers.vless-tcp.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-tcp.tls=true"
+      - "traefik.tcp.routers.vless-tcp.tls.certresolver=letsencrypt"
+      - "traefik.tcp.routers.vless-tcp.service=vless-tcp-service"
+      # Сервисы
+      - "traefik.http.services.vless-service.loadbalancer.server.port=80"
+      - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=443"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "http://localhost:8080/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+networks:
+  traefik_web-network:
+    external: true
