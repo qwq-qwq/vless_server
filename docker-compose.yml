@@ -10,6 +10,8 @@ services:
     volumes:
       - ./config:/etc/xray
       - ./logs:/var/log/xray
+    ports:
+      - "8443:8443"
     networks:
       - traefik_web-network
     labels:
