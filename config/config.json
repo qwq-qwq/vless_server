@@ -19,12 +19,7 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp",
-        "security": "tls",
-        "tlsSettings": {
-          "serverName": "vless-server.perek.rest",
-          "alpn": ["http/1.1"]
-        }
+        "network": "tcp"
       }
     }
   ],
