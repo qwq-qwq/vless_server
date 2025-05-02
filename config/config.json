@@ -19,7 +19,8 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp"
+        "network": "tcp",
+        "security": "none"
       }
     }
   ],
