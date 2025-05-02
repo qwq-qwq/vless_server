@@ -26,13 +26,13 @@ services:
       - "traefik.http.routers.vless-https.service=vless-service"
       # TCP роут для VLESS
       - "traefik.tcp.routers.vless-tcp.rule=HostSNI(`vless-server.perek.rest`)"
-      - "traefik.tcp.routers.vless-tcp.entrypoints=websecure"
+      - "traefik.tcp.routers.vless-tcp.entrypoints=vless"
       - "traefik.tcp.routers.vless-tcp.tls=true"
       - "traefik.tcp.routers.vless-tcp.tls.certresolver=myresolver"
       - "traefik.tcp.routers.vless-tcp.service=vless-tcp-service"
       # Сервисы
       - "traefik.http.services.vless-service.loadbalancer.server.port=80"
-      - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=443"
+      - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=8443"
 
 networks:
   traefik_web-network:
