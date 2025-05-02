@@ -6,7 +6,7 @@
   },
   "inbounds": [
     {
-      "port": 443,
+      "port": 8443,
       "protocol": "vless",
       "settings": {
         "clients": [
@@ -19,7 +19,12 @@
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp"
+        "network": "tcp",
+        "security": "tls",
+        "tlsSettings": {
+          "serverName": "vless-server.perek.rest",
+          "alpn": ["http/1.1"]
+        }
       }
     }
   ],
