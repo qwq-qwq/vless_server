@@ -15,11 +15,6 @@ pipeline {
         
         stage('Prepare Configuration') {
             steps {
-                // Create required directories
-                sh "mkdir -p ${env.APP_DIR}/logs ${env.APP_DIR}/config"
-                // Copy configuration files
-                sh "cp config/config.json ${env.APP_DIR}/config/config.json || true"
-                
                 // Generate UUID if not provided
                 script {
                     if (!env.VLESS_UUID) {
@@ -30,6 +25,11 @@ pipeline {
                 
                 // Update client VLESS_UUID in config
                 sh "sed -i 's/YOUR_UUID_HERE/${env.VLESS_UUID}/g' config/config.json"
+
+                // Create required directories
+                sh "mkdir -p ${env.APP_DIR}/logs ${env.APP_DIR}/config"
+                // Copy configuration files
+                sh "cp config/config.json ${env.APP_DIR}/config/config.json || true"
             }
         }
         
