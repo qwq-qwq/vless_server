@@ -30,6 +30,7 @@ pipeline {
                 sh "mkdir -p ${env.APP_DIR}/logs ${env.APP_DIR}/config"
                 // Copy configuration files
                 sh "cp config/config.json ${env.APP_DIR}/config/config.json || true"
+                sh "cp docker-compose.yml ${env.APP_DIR}/docker-compose.yml || true"
             }
         }
         

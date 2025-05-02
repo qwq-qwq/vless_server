@@ -53,8 +53,8 @@ add_user() {
     echo "Connection string for client:"
     echo "vless://$new_uuid@$domain:443?security=tls&type=tcp&encryption=none#$email"
     echo
-    echo "Restart the server to apply changes:"
-    echo "docker-compose restart"
+    echo "Restarting the server to apply changes..."
+    docker-compose restart
 }
 
 # Function to remove a user
@@ -78,8 +78,8 @@ remove_user() {
     mv "$CONFIG_FILE.tmp" "$CONFIG_FILE"
     
     echo "User $email removed successfully!"
-    echo "Restart the server to apply changes:"
-    echo "docker-compose restart"
+    echo "Restarting the server to apply changes..."
+    docker-compose restart
 }
 
 # Function to list all users
