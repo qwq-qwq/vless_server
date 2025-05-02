@@ -2,8 +2,7 @@ pipeline {
     agent any
     
     environment {
-        UUID = "${UUID}"
-        DOMAIN = "${DOMAIN ?: 'vless-server.perek.rest'}"
+        UUID = credentials('VLESS_UUID')
         APP_DIR = "/opt/projects/vless-server"
     }
     
@@ -61,7 +60,6 @@ pipeline {
         success {
             echo "VLESS server successfully deployed!"
             echo "Connection Information:"
-            echo "Domain: ${DOMAIN}"
             echo "Port: 443"
             echo "UUID: ${UUID}"
             echo "Protocol: VLESS"
