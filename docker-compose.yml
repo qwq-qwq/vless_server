@@ -35,5 +35,5 @@ services:
       - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=443"
 
 networks:
-  vless-network:
+  traefik_web-network:
     driver: bridge
