@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        UUID = credentials('VLESS_UUID')
+        UUID = credentials('vless-uuid')
         APP_DIR = "/opt/projects/vless-server"
     }
     
