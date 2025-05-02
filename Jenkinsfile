@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        UUID = credentials('vless-uuid')
+        VLESS_UUID = credentials('vless-uuid')
         APP_DIR = "/opt/projects/vless-server"
     }
     
@@ -22,14 +22,14 @@ pipeline {
                 
                 // Generate UUID if not provided
                 script {
-                    if (!env.UUID) {
-                        env.UUID = sh(script: 'uuidgen', returnStdout: true).trim()
-                        echo "Generated UUID: ${env.UUID}"
+                    if (!env.VLESS_UUID) {
+                        env.VLESS_UUID = sh(script: 'uuidgen', returnStdout: true).trim()
+                        echo "Generated UUID: ${env.VLESS_UUID}"
                     }
                 }
                 
-                // Update client UUID in config
-                sh "sed -i 's/YOUR_UUID_HERE/${env.UUID}/g' config/config.json"
+                // Update client VLESS_UUID in config
+                sh "sed -i 's/YOUR_UUID_HERE/${env.VLESS_UUID}/g' config/config.json"
             }
         }
         
@@ -61,7 +61,7 @@ pipeline {
             echo "VLESS server successfully deployed!"
             echo "Connection Information:"
             echo "Port: 443"
-            echo "UUID: ${UUID}"
+            echo "UUID: ${VLESS_UUID}"
             echo "Protocol: VLESS"
             echo "Network: tcp"
             echo "Using external Traefik for SSL termination"
