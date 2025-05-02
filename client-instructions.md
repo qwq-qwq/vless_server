@@ -1,13 +1,13 @@
-# Инструкция по подключению к VLESS VPN (без TLS)
+# Инструкция по подключению к VLESS VPN (с TLS)
 
 ## Общая информация
 
 - **Протокол**: VLESS
-- **Порт**: 8443
+- **Порт**: 443
 - **Шифрование**: none
 - **Сеть**: tcp
-- **Безопасность**: none (без TLS)
-- **IP/Домен**: YOUR_SERVER_IP_OR_DOMAIN
+- **Безопасность**: tls
+- **Домен**: vless-server.perek.rest
 
 ## Настройка на различных устройствах
 
@@ -17,9 +17,9 @@
 2. Откройте приложение и нажмите на значок "+" в правом верхнем углу
 3. Выберите "Import config from clipboard" и вставьте ссылку ниже:
    ```
-   vless://YOUR_UUID@YOUR_SERVER_IP_OR_DOMAIN:8443?security=none&type=tcp&encryption=none#YOUR_EMAIL
+   vless://YOUR_UUID@vless-server.perek.rest:443?security=tls&type=tcp&encryption=none#YOUR_EMAIL
    ```
-   Замените YOUR_UUID на ваш UUID, YOUR_SERVER_IP_OR_DOMAIN на IP или домен сервера и YOUR_EMAIL на вашу электронную почту
+   Замените YOUR_UUID на ваш UUID и YOUR_EMAIL на вашу электронную почту
 4. Нажмите на созданный профиль, чтобы подключиться
 
 ### iOS (Shadowrocket)
@@ -28,9 +28,9 @@
 2. Откройте приложение и нажмите на значок "+" 
 3. Скопируйте ссылку:
    ```
-   vless://YOUR_UUID@YOUR_SERVER_IP_OR_DOMAIN:8443?security=none&type=tcp&encryption=none#YOUR_EMAIL
+   vless://YOUR_UUID@vless-server.perek.rest:443?security=tls&type=tcp&encryption=none#YOUR_EMAIL
    ```
-   Замените YOUR_UUID на ваш UUID, YOUR_SERVER_IP_OR_DOMAIN на IP или домен сервера и YOUR_EMAIL на вашу электронную почту
+   Замените YOUR_UUID на ваш UUID и YOUR_EMAIL на вашу электронную почту
 4. Нажмите "Start" для подключения
 
 ### Windows/macOS/Linux (Qv2ray)
@@ -39,14 +39,14 @@
 2. Скачайте и установите [V2ray Core](https://github.com/v2fly/v2ray-core/releases)
 3. Настройте путь к V2ray Core в настройках Qv2ray
 4. Добавьте новое подключение и выберите протокол VLESS со следующими параметрами:
-   - Address: YOUR_SERVER_IP_OR_DOMAIN
-   - Port: 8443
+   - Address: vless-server.perek.rest
+   - Port: 443
    - UUID: YOUR_UUID
    - Flow: (оставьте пустым)
    - Encryption: none
    - Network: tcp
-   - Security: none
-   - SNI: (оставьте пустым)
+   - Security: tls
+   - SNI: vless-server.perek.rest
 
 ## Проверка подключения
 
@@ -56,22 +56,14 @@
 
 1. **Не удается подключиться:**
    - Проверьте правильность UUID
-   - Убедитесь, что порт 8443 открыт на сервере и не блокируется брандмауэром
-   - Проверьте, что сервер запущен и работает
+   - Убедитесь, что Traefik правильно настроен и обслуживает домен vless-server.perek.rest
+   - Проверьте, что сертификат Let's Encrypt был успешно получен
 
 2. **Медленное соединение:**
    - Возможно, сервер перегружен
    - Попробуйте изменить настройки MTU в клиенте (если доступно)
 
-3. **Вопросы безопасности:**
-   - Помните, что без TLS ваш трафик может быть более уязвим для перехвата и анализа
-   - Для большей безопасности рекомендуется использовать версию с TLS
-
 В случае проблем с подключением обратитесь к администратору.
-
-## Примечание по безопасности
-
-Использование VLESS без TLS менее безопасно, так как трафик не шифруется на транспортном уровне. Хотя сам протокол имеет базовое шифрование, рекомендуется использовать TLS для критически важных соединений.
 
 ---
 
