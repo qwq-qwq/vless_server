@@ -36,16 +36,18 @@ pipeline {
         
         stage('Deploy') {
             steps {
-                // Check if traefik_web-network exists, create if it doesn't
-                sh '''
-                    if ! docker network ls | grep -q traefik_web-network; then 
-                        docker network create traefik_web-network
-                    fi
-                '''
+                dir("${env.APP_DIR}") {
+                  // Check if traefik_web-network exists, create if it doesn't
+                  sh '''
+                      if ! docker network ls | grep -q traefik_web-network; then
+                          docker network create traefik_web-network
+                      fi
+                  '''
                 
-                // Deploy using Docker Compose
-                sh 'docker-compose down || true'
-                sh 'docker-compose up -d'
+                  // Deploy using Docker Compose
+                  sh 'docker-compose down || true'
+                  sh 'docker-compose up -d'
+                }
             }
         }
         
