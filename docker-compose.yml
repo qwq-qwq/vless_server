@@ -33,13 +33,7 @@ services:
       # Сервисы
       - "traefik.http.services.vless-service.loadbalancer.server.port=80"
       - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=443"
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "http://localhost:8080/ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
 
 networks:
-  traefik_web-network:
-    external: true
+  vless-network:
+    driver: bridge
