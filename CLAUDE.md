@@ -135,3 +135,41 @@ vless://550e8400-e29b-41d4-a716-446655440000@vless-server.perek.rest:443?securit
 - Домен `vless-server.perek.rest` указывающий на сервер
 - Открытые порты 80 и 443 на хосте для Traefik
 - `jq` для работы `manage-users.sh`
+
+## Обход блокировок
+
+### Основные методы
+
+1. **Cloudflare CDN** (рекомендуется)
+   - Настройте DNS запись с проксированием через Cloudflare
+   - Включите WebSockets в панели Cloudflare
+   - См. `README-CDN.md` для подробной инструкции
+
+2. **Альтернативные конфигурации**
+   - `config/config-cdn.json` - WebSocket с измененным путем для CDN
+   - `config/config-grpc.json` - gRPC транспорт (работает лучше в некоторых случаях)
+
+3. **Изменение WebSocket пути**
+   - Стандартный путь `/vlessws` может детектироваться
+   - Используйте нейтральные пути: `/api/v1/stream`, `/socket`, `/ws`
+
+4. **Фрагментация на клиенте**
+   - Многие клиенты поддерживают фрагментацию TLS handshake
+   - Помогает обойти DPI системы
+
+### Переключение между конфигурациями
+
+```bash
+# Использовать CDN конфигурацию
+cp config/config-cdn.json config/config.json
+docker-compose restart
+
+# Использовать gRPC конфигурацию
+cp config/config-grpc.json config/config.json
+docker-compose restart
+```
+
+### Альтернативные порты через Cloudflare
+
+Cloudflare поддерживает проксирование на портах: 2053, 2083, 2087, 2096, 8443
+Измените порт в connection string, если 443 блокируется.

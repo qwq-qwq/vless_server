@@ -27,9 +27,10 @@
         "network": "ws",
         "security": "none",
         "wsSettings": {
+          "acceptProxyProtocol": false,
           "path": "/vlessws",
           "headers": {
-            "Host": "vless-server.perek.rest"
+            "Host": "krasno.bond"
           }
         }
       }
@@ -38,7 +39,9 @@
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {},
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      },
       "tag": "direct"
     },
     {
@@ -55,6 +58,11 @@
         "ip": [
           "geoip:private"
         ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "protocol": ["bittorrent"],
         "outboundTag": "blocked"
       }
     ]
