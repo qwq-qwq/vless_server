@@ -14,12 +14,19 @@ services:
       - traefik_web-network
     labels:
       - "traefik.enable=true"
-      - "traefik.tcp.routers.vless-tcp.rule=HostSNI(`vless-server.perek.rest`)"
-      - "traefik.tcp.routers.vless-tcp.entrypoints=vless"
-      - "traefik.tcp.routers.vless-tcp.tls=true"
-      - "traefik.tcp.routers.vless-tcp.tls.certresolver=myresolver"
-      - "traefik.tcp.routers.vless-tcp.service=vless-tcp-service"
-      - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=8443"
+      # HTTPS роутер для WebSocket
+      - "traefik.http.routers.vless-https.rule=Host(`vless-server.perek.rest`)"
+      - "traefik.http.routers.vless-https.entrypoints=websecure"
+      - "traefik.http.routers.vless-https.tls=true"
+      - "traefik.http.routers.vless-https.tls.certresolver=myresolver"
+      - "traefik.http.routers.vless-https.service=vless-service"
+      - "traefik.http.services.vless-service.loadbalancer.server.port=8443"
+      # HTTP редирект на HTTPS
+      - "traefik.http.routers.vless-http.rule=Host(`vless-server.perek.rest`)"
+      - "traefik.http.routers.vless-http.entrypoints=web"
+      - "traefik.http.routers.vless-http.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
 
 networks:
   traefik_web-network:

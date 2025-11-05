@@ -51,7 +51,7 @@ add_user() {
     echo "Domain: $domain"
     echo "======================="
     echo "Connection string for client:"
-    echo "vless://$new_uuid@$domain:443?security=tls&type=tcp&encryption=none#$email"
+    echo "vless://$new_uuid@$domain:443?security=tls&type=ws&path=/vlessws&host=$domain&encryption=none#$email"
     echo
     echo "Restarting the server to apply changes..."
     docker-compose restart
@@ -91,7 +91,7 @@ list_users() {
     domain=$(grep -o 'Host(`[^`]*`)' docker-compose.yml | head -1 | sed 's/Host(`\(.*\)`)/\1/')
     
     # List users with connection strings
-    jq -r '.inbounds[0].settings.clients[] | "Email: \(.email)\nUUID: \(.id)\nConnection string: vless://\(.id)@'$domain':443?security=tls&type=tcp&encryption=none#\(.email)\n---------------------"' "$CONFIG_FILE"
+    jq -r '.inbounds[0].settings.clients[] | "Email: \(.email)\nUUID: \(.id)\nConnection string: vless://\(.id)@'$domain':443?security=tls&type=ws&path=/vlessws&host='$domain'&encryption=none#\(.email)\n---------------------"' "$CONFIG_FILE"
 }
 
 # Main script
