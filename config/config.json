@@ -19,9 +19,7 @@
         "wsSettings": {
           "acceptProxyProtocol": false,
           "path": "/",
-          "headers": {
-            "Host": "krasno.bond"
-          }
+          "host": "krasno.bond"
         }
       }
     }
