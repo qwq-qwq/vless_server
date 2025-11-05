@@ -7,28 +7,18 @@
   "inbounds": [
     {
       "port": 8443,
-      "protocol": "vless",
+      "protocol": "shadowsocks",
       "settings": {
-        "clients": [
-          {
-            "id": "YOUR_UUID_HERE",
-            "level": 0,
-            "email": "sergey@perek.rest"
-          }
-        ],
-        "decryption": "none",
-        "fallbacks": [
-          {
-            "dest": 80
-          }
-        ]
+        "method": "chacha20-ietf-poly1305",
+        "password": "YOUR_UUID_HERE",
+        "network": "tcp,udp"
       },
       "streamSettings": {
         "network": "ws",
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": false,
-          "path": "/api/v2/updates",
+          "path": "/",
           "headers": {
             "Host": "krasno.bond"
           }
