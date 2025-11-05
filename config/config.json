@@ -7,18 +7,21 @@
   "inbounds": [
     {
       "port": 8443,
-      "protocol": "shadowsocks",
+      "protocol": "trojan",
       "settings": {
-        "method": "chacha20-ietf-poly1305",
-        "password": "YOUR_UUID_HERE",
-        "network": "tcp,udp"
+        "clients": [
+          {
+            "password": "e08d5933-f3ba-4b7c-b3d5-2661088924d5",
+            "email": "default@krasno.bond"
+          }
+        ]
       },
       "streamSettings": {
         "network": "ws",
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": false,
-          "path": "/",
+          "path": "/trojan",
           "host": "krasno.bond"
         }
       }
