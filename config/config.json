@@ -28,7 +28,7 @@
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": false,
-          "path": "/vlessws",
+          "path": "/api/v2/updates",
           "headers": {
             "Host": "krasno.bond"
           }
