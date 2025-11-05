@@ -7,11 +7,12 @@
   "inbounds": [
     {
       "port": 8443,
-      "protocol": "trojan",
+      "protocol": "vmess",
       "settings": {
         "clients": [
           {
-            "password": "e08d5933-f3ba-4b7c-b3d5-2661088924d5",
+            "id": "YOUR_UUID_HERE",
+            "alterId": 0,
             "email": "default@krasno.bond"
           }
         ]
@@ -21,7 +22,7 @@
         "security": "none",
         "wsSettings": {
           "acceptProxyProtocol": false,
-          "path": "/trojan",
+          "path": "/",
           "host": "krasno.bond"
         }
       }
