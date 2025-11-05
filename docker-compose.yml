@@ -14,15 +14,15 @@ services:
       - traefik_web-network
     labels:
       - "traefik.enable=true"
-      # HTTPS роутер для VMess WebSocket на корневом пути
-      - "traefik.http.routers.vless-https.rule=Host(`krasno.bond`)"
+      # HTTPS роутер для VMess WebSocket на API пути
+      - "traefik.http.routers.vless-https.rule=Host(`krasno.bond`) && PathPrefix(`/api/v3/live/stream`)"
       - "traefik.http.routers.vless-https.entrypoints=websecure"
       - "traefik.http.routers.vless-https.tls=true"
       - "traefik.http.routers.vless-https.tls.certresolver=myresolver"
       - "traefik.http.routers.vless-https.service=vless-service"
       - "traefik.http.services.vless-service.loadbalancer.server.port=8443"
-      # HTTP редирект на HTTPS
-      - "traefik.http.routers.vless-http.rule=Host(`krasno.bond`)"
+      # HTTP редирект на HTTPS для API пути
+      - "traefik.http.routers.vless-http.rule=Host(`krasno.bond`) && PathPrefix(`/api/v3/live/stream`)"
       - "traefik.http.routers.vless-http.entrypoints=web"
       - "traefik.http.routers.vless-http.middlewares=https-redirect"
       - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
