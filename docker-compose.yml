@@ -18,6 +18,7 @@ services:
       - net.ipv4.tcp_congestion_control=bbr
     labels:
       - "traefik.enable=true"
+      - "traefik.docker.network=traefik_web-network"
       # TCP Router для Reality (passthrough mode)
       - "traefik.tcp.routers.vless-reality.rule=HostSNI(`v-server.perek.rest`)"
       - "traefik.tcp.routers.vless-reality.entrypoints=websecure"
