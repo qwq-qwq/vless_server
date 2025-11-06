@@ -3,6 +3,7 @@ pipeline {
     
     environment {
         VLESS_UUID = credentials('vless-uuid')
+        VLESS_PRIVATE_KEY = credentials('vless-private-key')
         APP_DIR = "/opt/projects/vless-server"
     }
     
@@ -23,8 +24,9 @@ pipeline {
                     }
                 }
                 
-                // Update client VLESS_UUID in config
+                // Update VLESS UUID and Private Key in config
                 sh "sed -i 's/YOUR_UUID_HERE/${env.VLESS_UUID}/g' config/config.json"
+                sh "sed -i 's/YOUR_PRIVATE_KEY_HERE/${env.VLESS_PRIVATE_KEY}/g' config/config.json"
 
                 // Create required directories
                 sh "mkdir -p ${env.APP_DIR}/logs ${env.APP_DIR}/config"
@@ -43,7 +45,7 @@ pipeline {
                           docker network create traefik_web-network
                       fi
                   '''
-                
+
                   // Deploy using Docker Compose
                   sh 'docker-compose down || true'
                   sh 'docker-compose up -d'

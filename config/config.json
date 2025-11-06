@@ -4,62 +4,49 @@
     "error": "/var/log/xray/error.log",
     "loglevel": "warning"
   },
-  "dns": {
-    "servers": [
-      {
-        "address": "8.8.8.8",
-        "port": 53,
-        "domains": ["geosite:google", "geosite:youtube", "geosite:facebook", "geosite:twitter"],
-        "expectIPs": []
-      },
-      {
-        "address": "1.1.1.1",
-        "port": 53,
-        "domains": ["geosite:telegram"],
-        "expectIPs": []
-      },
-      {
-        "address": "114.114.114.114",
-        "port": 53,
-        "domains": ["geosite:cn"],
-        "expectIPs": []
-      },
-      "8.8.4.4",
-      "1.0.0.1"
-    ]
-  },
   "inbounds": [
     {
-      "port": 8443,
-      "protocol": "vmess",
+      "port": 443,
+      "protocol": "vless",
       "settings": {
         "clients": [
           {
             "id": "YOUR_UUID_HERE",
-            "alterId": 0,
-            "email": "default@krasno.bond"
+            "flow": "xtls-rprx-vision",
+            "email": "default@v-server.perek.rest"
           }
-        ]
+        ],
+        "decryption": "none"
       },
       "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": false,
-          "path": "/",
-          "host": "krasno.bond"
+        "network": "tcp",
+        "security": "reality",
+        "realitySettings": {
+          "show": false,
+          "dest": "www.microsoft.com:443",
+          "xver": 0,
+          "serverNames": [
+            "www.microsoft.com",
+            "microsoft.com"
+          ],
+          "privateKey": "YOUR_PRIVATE_KEY_HERE",
+          "shortIds": [
+            "",
+            "0123456789abcdef"
+          ]
         },
         "sockopt": {
           "tcpFastOpen": true,
-          "tcpNoDelay": true,
-          "tcpKeepAliveInterval": 10,
-          "mark": 255
+          "tcpNoDelay": true
         }
       },
       "sniffing": {
-        "enabled": false,
-        "destOverride": [],
-        "metadataOnly": false
+        "enabled": true,
+        "destOverride": [
+          "http",
+          "tls",
+          "quic"
+        ]
       }
     }
   ],
@@ -67,108 +54,33 @@
     {
       "protocol": "freedom",
       "settings": {
-        "domainStrategy": "UseIP",
-        "userLevel": 0
-      },
-      "tag": "direct",
-      "streamSettings": {
-        "sockopt": {
-          "tcpFastOpen": true,
-          "tcpNoDelay": true
-        }
-      }
-    },
-    {
-      "protocol": "freedom",
-      "settings": {
         "domainStrategy": "UseIPv4"
       },
-      "tag": "direct-v4"
+      "tag": "direct"
     },
     {
       "protocol": "blackhole",
       "settings": {},
       "tag": "blocked"
-    },
-    {
-      "protocol": "dns",
-      "tag": "dns-out"
     }
   ],
   "routing": {
-    "domainStrategy": "IPOnDemand",
+    "domainStrategy": "AsIs",
     "rules": [
       {
         "type": "field",
-        "inboundTag": ["api"],
-        "outboundTag": "api"
-      },
-      {
-        "type": "field",
-        "protocol": ["dns"],
-        "outboundTag": "dns-out"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "domain:telegram.org",
-          "domain:telegram.me",
-          "domain:t.me",
-          "domain:youtube.com",
-          "domain:googlevideo.com",
-          "domain:googleapis.com",
-          "domain:ytimg.com",
-          "domain:ggpht.com",
-          "domain:twitter.com",
-          "domain:x.com",
-          "domain:facebook.com",
-          "domain:instagram.com"
-        ],
-        "outboundTag": "direct-v4"
-      },
-      {
-        "type": "field",
         "ip": [
-          "91.108.4.0/22",
-          "91.108.8.0/22",
-          "91.108.12.0/22",
-          "91.108.16.0/22",
-          "91.108.20.0/22",
-          "91.108.56.0/22",
-          "149.154.160.0/20",
-          "91.105.192.0/23",
-          "91.108.20.0/23",
-          "185.76.151.0/24"
+          "geoip:private"
         ],
-        "outboundTag": "direct-v4"
-      },
-      {
-        "type": "field",
-        "ip": ["geoip:private"],
         "outboundTag": "blocked"
       },
       {
         "type": "field",
-        "protocol": ["bittorrent"],
+        "protocol": [
+          "bittorrent"
+        ],
         "outboundTag": "blocked"
       }
     ]
-  },
-  "policy": {
-    "levels": {
-      "0": {
-        "handshake": 4,
-        "connIdle": 300,
-        "uplinkOnly": 2,
-        "downlinkOnly": 5,
-        "bufferSize": 10240
-      }
-    },
-    "system": {
-      "statsInboundUplink": false,
-      "statsInboundDownlink": false,
-      "statsOutboundUplink": false,
-      "statsOutboundDownlink": false
-    }
   }
 }
