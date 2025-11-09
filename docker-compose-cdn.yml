@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  vless:
+    image: teddysun/xray
+    container_name: vless-server
+    restart: always
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./config:/etc/xray
+      - ./logs:/var/log/xray
+    networks:
+      - traefik_web-network
+    cap_add:
+      - NET_ADMIN
+    sysctls:
+      - net.ipv4.tcp_congestion_control=bbr
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=traefik_web-network"
+
+      # HTTP Router для WebSocket/gRPC (Cloudflare терминирует TLS)
+      - "traefik.http.routers.vless-cdn.rule=Host(`v-server.perek.rest`)"
+      - "traefik.http.routers.vless-cdn.entrypoints=websecure"
+      - "traefik.http.routers.vless-cdn.service=vless-cdn-service"
+      - "traefik.http.routers.vless-cdn.tls=true"
+      - "traefik.http.routers.vless-cdn.tls.certresolver=myresolver"
+
+      # Service definition
+      - "traefik.http.services.vless-cdn-service.loadbalancer.server.port=8443"
+
+      # HTTP to HTTPS redirect
+      - "traefik.http.routers.vless-cdn-http.rule=Host(`v-server.perek.rest`)"
+      - "traefik.http.routers.vless-cdn-http.entrypoints=web"
+      - "traefik.http.routers.vless-cdn-http.middlewares=https-redirect"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.https-redirect.redirectscheme.permanent=true"
+
+networks:
+  traefik_web-network:
+    external: true
