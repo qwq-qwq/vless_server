@@ -30,18 +30,21 @@
    TTL: Auto
    ```
 
-3. **Включите WebSocket в Cloudflare:**
-   - Перейдите: Network → WebSockets
-   - Включите: WebSockets ✅
-
-4. **Оптимизация SSL/TLS:**
-   - SSL/TLS → Overview → Encryption mode: **Full (strict)**
+3. **Настройте SSL/TLS (КРИТИЧНО!):**
+   - SSL/TLS → Overview → Encryption mode: **Full (strict)** или **Full**
    - SSL/TLS → Edge Certificates:
      - Always Use HTTPS: ✅
      - Minimum TLS Version: TLS 1.2
      - Opportunistic Encryption: ✅
      - TLS 1.3: ✅
      - Automatic HTTPS Rewrites: ✅
+
+   **Важно:** НЕ используйте "Flexible" - это не будет работать!
+
+4. **WebSocket поддержка:**
+   - ✅ WebSocket **включен по умолчанию** на всех планах Cloudflare (с 2020 года)
+   - Никаких дополнительных настроек не требуется
+   - Если в разделе Network → WebSockets есть переключатель - убедитесь что он ON
 
 5. **Дополнительная обфускация (опционально):**
    - Speed → Optimization:
