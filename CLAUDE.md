@@ -4,29 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Обзор проекта
 
-Это VLESS VPN сервер, работающий в Docker контейнере с использованием Xray. Сервер интегрируется с внешним Traefik прокси для SSL/TLS терминации и маршрутизации. Проект использует Jenkins для автоматизированного деплоя.
+Это VLESS + XTLS Reality VPN сервер, работающий в Docker контейнере с использованием Xray. Сервер работает **напрямую на порту 443 БЕЗ Traefik**, используя протокол Reality для маскировки под обычный HTTPS трафик к microsoft.com. Проект использует Jenkins для автоматизированного деплоя.
 
 ## Архитектура
 
 ### Основные компоненты
 
-1. **Xray (VLESS)** - запускается в Docker контейнере `teddysun/xray`, слушает порт 8443
-2. **Traefik** - внешний обратный прокси, управляет SSL/TLS и маршрутизацией к контейнеру VLESS
-3. **Docker Network** - `traefik_web-network` (external) связывает VLESS и Traefik
+1. **Xray (VLESS + XTLS Reality)** - запускается в Docker контейнере `teddysun/xray`, слушает порт 443
+2. **Протокол Reality** - маскируется под TLS соединение к microsoft.com, неотличим от обычного HTTPS
+3. **Прямое подключение** - работает БЕЗ Traefik на порту 443
 
 ### Поток трафика
 
 ```
-Клиент → [HTTPS:443 WebSocket] → Traefik → [HTTP:8443 /vlessws] → VLESS контейнер → Интернет
+Авторизованный клиент → [Reality TLS:443] → VLESS контейнер → Интернет
+Цензор/посторонний → [Reality TLS:443] → VLESS контейнер → microsoft.com (проксирование)
 ```
 
-Traefik терминирует TLS соединения и проксирует HTTP/WebSocket трафик на порт 8443 VLESS контейнера. VLESS использует WebSocket транспорт на пути `/vlessws` для маскировки под обычный HTTPS трафик, что затрудняет обнаружение и блокировку.
+Reality использует протокол XTLS для маскировки:
+- При подключении **авторизованного клиента** (с правильным Public Key) - работает как VPN
+- При подключении **цензора или постороннего** - проксирует трафик на настоящий microsoft.com
+- DPI видит обычный HTTPS к microsoft.com с правильным сертификатом Microsoft
+- **Никаких следов VPN/прокси**
 
 ### Конфигурационные файлы
 
-- `config/config.json` - основная конфигурация Xray/VLESS с массивом клиентов (UUID, email)
-- `docker-compose.yml` - определяет контейнер VLESS с Traefik labels для маршрутизации
-- `Jenkinsfile` - пайплайн для автоматического деплоя на сервер
+- `config/config.json` - основная конфигурация Xray VLESS + Reality (UUID, Private Key, dest: microsoft.com)
+- `docker-compose.yml` - определяет контейнер VLESS с прямым пробросом порта 443 (БЕЗ Traefik)
+- `Jenkinsfile` - пайплайн для автоматического деплоя (заменяет UUID и Private Key из Jenkins secrets)
+- `REALITY-WITHOUT-TRAEFIK.md` - документация о текущей рабочей конфигурации
 
 ## Команды разработки
 
@@ -67,109 +73,99 @@ docker-compose ps
 
 **Важно**: Скрипт требует установленный `jq` для манипуляции JSON.
 
-### Docker Network
-
-```bash
-# Проверить существование сети traefik_web-network
-docker network ls | grep traefik_web-network
-
-# Создать сеть (если отсутствует)
-docker network create traefik_web-network
-```
-
 ## Особенности конфигурации
 
-### VLESS настройки (config/config.json)
+### VLESS + Reality настройки (config/config.json)
 
 - Протокол: VLESS
-- Порт: 8443 (внутренний)
+- Порт: 443 (прямой проброс)
+- Flow: xtls-rprx-vision (оптимизация скорости)
 - Decryption: none
-- Network: WebSocket (`ws`)
-- WebSocket Path: `/vlessws`
-- Fallbacks: перенаправление на порт 80 для неправильных запросов
+- Network: TCP (не WebSocket!)
+- Security: reality
+- Dest: www.microsoft.com:443 (сайт-маскировка)
+- ServerNames: ["www.microsoft.com", "microsoft.com"]
+- PrivateKey: хранится в Jenkins secrets (vless-private-key)
+- ShortIds: ["", "0123456789abcdef"]
 - Клиенты хранятся в массиве `inbounds[0].settings.clients[]`
-- Routing: блокировка приватных IP адресов
-
-### Traefik Labels (docker-compose.yml)
-
-- `traefik.http.routers.vless-https.rule` - маршрутизация по Host заголовку
-- `traefik.http.routers.vless-https.entrypoints=websecure` - использует стандартный HTTPS entrypoint (443)
-- `traefik.http.routers.vless-https.tls.certresolver=myresolver` - автоматические Let's Encrypt сертификаты
-- `traefik.http.services.vless-service.loadbalancer.server.port=8443` - бэкенд порт
-- HTTP to HTTPS редирект для маскировки под обычный веб-сервис
+- Routing: блокировка приватных IP адресов и BitTorrent
 
 ### Jenkins Pipeline
 
 Пайплайн выполняет:
 1. Checkout кода
-2. Замену `YOUR_UUID_HERE` в config.json на UUID из Jenkins credentials
-3. Создание директорий в `/opt/projects/vless-server`
-4. Копирование конфигурации на сервер
-5. Проверку/создание Docker сети
+2. Замену `YOUR_UUID_HERE` на UUID из Jenkins credentials (`vless-uuid`)
+3. Замену `YOUR_PRIVATE_KEY_HERE` на Private Key из Jenkins credentials (`vless-private-key`)
+4. Создание директорий в `/opt/projects/vless-server`
+5. Копирование конфигурации на сервер
 6. Запуск контейнера через docker-compose
 
-**Credentials**: требуется Jenkins credential с ID `vless-uuid`.
+**Credentials**:
+- `vless-uuid` - UUID клиента
+- `vless-private-key` - Private key для Reality (сгенерирован через `xray x25519`)
 
-## Connection String формат
+## Connection String формат (Reality)
 
 ```
-vless://{UUID}@{DOMAIN}:443?security=tls&type=ws&path=/vlessws&host={DOMAIN}&encryption=none#{EMAIL}
+vless://{UUID}@{DOMAIN}:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.microsoft.com&fp=chrome&pbk={PUBLIC_KEY}&sid=0123456789abcdef&type=tcp#{NAME}
 ```
 
-Пример:
+**Рабочий пример:**
 ```
-vless://550e8400-e29b-41d4-a716-446655440000@vless-server.perek.rest:443?security=tls&type=ws&path=/vlessws&host=vless-server.perek.rest&encryption=none#sergey@perek.rest
+vless://e08d5933-f3ba-4b7c-b3d5-2661088924d5@v-server.perek.rest:443?encryption=none&flow=xtls-rprx-vision&security=reality&sni=www.microsoft.com&fp=chrome&pbk=ipuCVX0VbAiTwR7g-3If3FDdfbm1KdcJJNs09umlZi0&sid=0123456789abcdef&type=tcp#Reality-VServer
 ```
 
 **Важные параметры:**
-- `type=ws` - использование WebSocket транспорта
-- `path=/vlessws` - WebSocket путь (должен совпадать с wsSettings.path в config.json)
-- `host={DOMAIN}` - заголовок Host для WebSocket handshake
-- `security=tls` - TLS шифрование обрабатывается Traefik
+- `type=tcp` - TCP соединение (не WebSocket!)
+- `security=reality` - протокол Reality
+- `sni=www.microsoft.com` - SNI для маскировки
+- `fp=chrome` - TLS fingerprint (имитация браузера Chrome)
+- `pbk=...` - Public Key (пара к Private Key на сервере)
+- `sid=0123456789abcdef` - Short ID
+- `flow=xtls-rprx-vision` - оптимизация XTLS
 
 ## Зависимости и требования
 
 - Docker и Docker Compose
-- Внешний Traefik с entrypoints `web` (80) и `websecure` (443), certresolver `myresolver`
-- Docker сеть `traefik_web-network` (должна быть создана заранее)
-- Домен `vless-server.perek.rest` указывающий на сервер
-- Открытые порты 80 и 443 на хосте для Traefik
-- `jq` для работы `manage-users.sh`
+- Домен `v-server.perek.rest` указывающий на сервер (IP: 104.248.100.73)
+- Открытый порт 443 на хосте (БЕЗ Traefik!)
+- Jenkins с credentials: `vless-uuid` и `vless-private-key`
+
+**ВАЖНО:** Traefik должен быть остановлен, так как Reality занимает порт 443.
 
 ## Обход блокировок
 
-### Основные методы
+### Почему Reality лучше всех для России (2025)
 
-1. **Cloudflare CDN** (рекомендуется)
-   - Настройте DNS запись с проксированием через Cloudflare
-   - Включите WebSockets в панели Cloudflare
-   - См. `README-CDN.md` для подробной инструкции
+1. **Полная невидимость для DPI**
+   - Трафик неотличим от обычного HTTPS к microsoft.com
+   - При сканировании цензором - показывает настоящий сайт Microsoft
+   - Нет паттернов VPN/прокси
 
-2. **Альтернативные конфигурации**
-   - `config/config-cdn.json` - WebSocket с измененным путем для CDN
-   - `config/config-grpc.json` - gRPC транспорт (работает лучше в некоторых случаях)
+2. **Не требует Cloudflare CDN**
+   - CDN часто блокируется в России
+   - Reality работает напрямую с сервером
+   - Не зависит от внешних сервисов
 
-3. **Изменение WebSocket пути**
-   - Стандартный путь `/vlessws` может детектироваться
-   - Используйте нейтральные пути: `/api/v1/stream`, `/socket`, `/ws`
+3. **Высокая скорость**
+   - XTLS Vision устраняет двойное шифрование
+   - TCP вместо WebSocket = меньше оверхеда
+   - BBR congestion control для оптимизации
 
-4. **Фрагментация на клиенте**
-   - Многие клиенты поддерживают фрагментацию TLS handshake
-   - Помогает обойти DPI системы
+4. **Устойчивость к активному сканированию**
+   - Неавторизованные подключения идут на microsoft.com
+   - Нет способа отличить от настоящего сайта
+   - Public/Private key аутентификация
 
-### Переключение между конфигурациями
+### Альтернативные домены для маскировки
 
-```bash
-# Использовать CDN конфигурацию
-cp config/config-cdn.json config/config.json
-docker-compose restart
+Вместо microsoft.com можно использовать (в config.json):
+- `www.apple.com` - Apple
+- `www.cloudflare.com` - Cloudflare
+- `www.github.com` - GitHub
+- `www.amazon.com` - Amazon
 
-# Использовать gRPC конфигурацию
-cp config/config-grpc.json config/config.json
-docker-compose restart
-```
-
-### Альтернативные порты через Cloudflare
-
-Cloudflare поддерживает проксирование на портах: 2053, 2083, 2087, 2096, 8443
-Измените порт в connection string, если 443 блокируется.
+Критерии выбора:
+- ✅ Популярный сайт (много легитимного трафика)
+- ✅ Точно не заблокирован в России
+- ✅ Использует современный TLS

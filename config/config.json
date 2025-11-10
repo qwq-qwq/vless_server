@@ -6,34 +6,26 @@
   },
   "inbounds": [
     {
-      "port": 443,
+      "port": 8443,
       "protocol": "vless",
       "settings": {
         "clients": [
           {
             "id": "YOUR_UUID_HERE",
-            "flow": "xtls-rprx-vision",
-            "email": "default@v-server.perek.rest"
+            "email": "default@krasno.bond"
           }
         ],
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "tcp",
-        "security": "reality",
-        "realitySettings": {
-          "show": false,
-          "dest": "www.microsoft.com:443",
-          "xver": 0,
-          "serverNames": [
-            "www.microsoft.com",
-            "microsoft.com"
-          ],
-          "privateKey": "YOUR_PRIVATE_KEY_HERE",
-          "shortIds": [
-            "",
-            "0123456789abcdef"
-          ]
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "acceptProxyProtocol": false,
+          "path": "/api/v2/stream",
+          "headers": {
+            "Host": "krasno.bond"
+          }
         },
         "sockopt": {
           "tcpFastOpen": true,
@@ -56,7 +48,13 @@
       "settings": {
         "domainStrategy": "UseIPv4"
       },
-      "tag": "direct"
+      "tag": "direct",
+      "streamSettings": {
+        "sockopt": {
+          "tcpFastOpen": true,
+          "tcpNoDelay": true
+        }
+      }
     },
     {
       "protocol": "blackhole",
