@@ -10,21 +10,16 @@ services:
     volumes:
       - ./config:/etc/xray
       - ./logs:/var/log/xray
-    expose:
-      - "8443"
-    cap_add:
-      - NET_ADMIN
-    sysctls:
-      - net.ipv4.tcp_congestion_control=bbr
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.vless.rule=Host(`krasno.bond`)"
-      - "traefik.http.routers.vless.entrypoints=websecure"
-      - "traefik.http.routers.vless.tls=true"
-      - "traefik.http.routers.vless.tls.certresolver=myresolver"
-      - "traefik.http.services.vless.loadbalancer.server.port=8443"
     networks:
       - traefik_web-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.tcp.routers.vless-tcp.rule=HostSNI(`vless-server.perek.rest`)"
+      - "traefik.tcp.routers.vless-tcp.entrypoints=vless"
+      - "traefik.tcp.routers.vless-tcp.tls=true"
+      - "traefik.tcp.routers.vless-tcp.tls.certresolver=myresolver"
+      - "traefik.tcp.routers.vless-tcp.service=vless-tcp-service"
+      - "traefik.tcp.services.vless-tcp-service.loadbalancer.server.port=8443"
 
 networks:
   traefik_web-network:

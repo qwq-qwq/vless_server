@@ -2,7 +2,7 @@
   "log": {
     "access": "/var/log/xray/access.log",
     "error": "/var/log/xray/error.log",
-    "loglevel": "warning"
+    "loglevel": "debug"
   },
   "inbounds": [
     {
@@ -12,73 +12,21 @@
         "clients": [
           {
             "id": "YOUR_UUID_HERE",
-            "email": "default@krasno.bond"
+            "level": 0,
+            "email": "sergey@perek.rest"
           }
         ],
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "ws",
-        "security": "none",
-        "wsSettings": {
-          "acceptProxyProtocol": false,
-          "path": "/api/v2/stream",
-          "headers": {
-            "Host": "krasno.bond"
-          }
-        },
-        "sockopt": {
-          "tcpFastOpen": true,
-          "tcpNoDelay": true
-        }
-      },
-      "sniffing": {
-        "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ]
+        "network": "tcp"
       }
     }
   ],
   "outbounds": [
     {
       "protocol": "freedom",
-      "settings": {
-        "domainStrategy": "UseIPv4"
-      },
-      "tag": "direct",
-      "streamSettings": {
-        "sockopt": {
-          "tcpFastOpen": true,
-          "tcpNoDelay": true
-        }
-      }
-    },
-    {
-      "protocol": "blackhole",
-      "settings": {},
-      "tag": "blocked"
+      "settings": {}
     }
-  ],
-  "routing": {
-    "domainStrategy": "AsIs",
-    "rules": [
-      {
-        "type": "field",
-        "ip": [
-          "geoip:private"
-        ],
-        "outboundTag": "blocked"
-      },
-      {
-        "type": "field",
-        "protocol": [
-          "bittorrent"
-        ],
-        "outboundTag": "blocked"
-      }
-    ]
-  }
+  ]
 }
