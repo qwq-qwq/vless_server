@@ -112,6 +112,11 @@ docker network create traefik_web-network
 vless://{UUID}@{DOMAIN}:443?security=tls&type=tcp&encryption=none#{EMAIL}
 ```
 
+Пример:
+```
+vless://550e8400-e29b-41d4-a716-446655440000@vless-server.perek.rest:443?security=tls&type=tcp&encryption=none#sergey@perek.rest
+```
+
 ## Зависимости и требования
 
 - Docker и Docker Compose
